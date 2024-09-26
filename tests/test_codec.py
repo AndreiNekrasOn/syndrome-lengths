@@ -17,18 +17,18 @@ class UHammingTest(unittest.TestCase):
         codec = Hamming(7, 3, 4)
         message = '101'
         error = np.array([1, 1, 0, 0, 0, 0, 0])
-        codeword, syndrome = codec.encode(message, error)
-        self.assertRaises(Exception, lambda _: codec.decode(codeword, syndrome))
+        codeword = codec.encode(message)
+        self.assertRaises(Exception, lambda _: codec.decode((codeword + error) % 2)[0])
 
     def test_no_errors(self):
         codec = Hamming(7, 4)
         message = '1111'
-        mhat = codec.decode(*codec.encode(message)) # unpack
+        mhat = codec.decode((codec.encode(message)) % 2)[0]
         self.assertEqual(mhat, message)
 
         codec = Hamming(7, 3, 4)
         message = '000'
-        mhat = codec.decode(*codec.encode(message))
+        mhat = codec.decode((codec.encode(message)) % 2)[0]
         self.assertEqual(mhat, message)
 
     def test_all_errors3(self):
@@ -36,8 +36,9 @@ class UHammingTest(unittest.TestCase):
         message = '1010'
         errors = np.identity(7)
         for error in errors:
-            codeword, syndrome = codec.encode(message, error)
-            mhat = codec.decode(codeword, syndrome)
+            codeword = codec.encode(message)
+            codeword = (codeword + error) % 2
+            mhat = codec.decode(codeword)[0]
             self.assertEqual(mhat, message, msg=f'Error: {error}')
 
     def test_all_errors4(self):
@@ -45,8 +46,9 @@ class UHammingTest(unittest.TestCase):
         message = '100'
         errors = np.identity(7)
         for error in errors:
-            codeword, syndrome = codec.encode(message, error)
-            mhat = codec.decode(codeword, syndrome)
+            codeword = codec.encode(message)
+            codeword = (codeword + error) % 2
+            mhat = codec.decode(codeword)[0]
             self.assertEqual(mhat, message)
 
 if __name__ == '__main__':

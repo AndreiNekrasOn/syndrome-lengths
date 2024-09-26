@@ -11,7 +11,7 @@ class Hamming:
         self.G = self.build_gen_matrix()
         self.syndromes = self.get_syndromes()
 
-    def _build_check_matrix3(self, n, k):
+    def _build_check_matrix3(self, n: int, k: int):
         r = n - k
         if n > 2**r - 1:
             raise ValueError(f"Impossible code: ({n}, {k})")
@@ -47,40 +47,34 @@ class Hamming:
         return G
 
     def get_syndromes(self):
-        errors = np.identity(self.n, dtype=int)
         H = self.build_check_matrix()
-        syndromes = np.array([], dtype=int)
-        for i in range(self.n):
-            if np.size(syndromes) == 0:
-                syndromes = np.hstack([syndromes, errors[i] @ H.T])
-            else:
-                syndromes = np.vstack([syndromes, errors[i] @ H.T])
+        syndromes = H.T
         return syndromes
 
-    def encode(self, message: str, error: np.ndarray | None = None):
-        assert len(message) == self.k
+    def encode(self, message: str):
+        if len(message) != self.k:
+            raise(ValueError(f'lengths dont match {len(message)} != {self.k}'))
         m = np.array(list(message), dtype=int)
-        c = m @ self.G % 2
-        if type(error) is np.ndarray:
-            c = (c + error) % 2
-        s = (c @ self.H.T) % 2
-        return c, s
+        c = (m @ self.G) % 2
+        return c
 
-    def decode(self, codeword, syndrome):
-        syndromes = self.syndromes[:, :len(syndrome)]
+    def decode(self, codeword: np.ndarray):
+        '''
+        Expects <= 2 errors in the codeword
+        '''
+        syndromes = self.syndromes
+        syndrome = (codeword @ self.H.T) % 2
         errors = np.identity(self.n, dtype=int)
         j = 0
         if (syndrome!=np.zeros_like(syndrome)).any():
             j = -1
             for i in range(self.n):
                 if (syndromes[i]==syndrome).all():
-                    if j != -1:
-                        raise ValueError('Repeated matching syndrome')
                     j = i
             if j != -1:
-                codeword = codeword + errors[j] % 2
+                codeword = (codeword + errors[j]) % 2
         if j == -1:
-            raise ValueError('Message contains more than 1 error')
+            return '', True
         m = codeword[:self.k] % 2
-        return ''.join(str(int(i)) for i in m)
+        return ''.join(str(int(i)) for i in m), False
 

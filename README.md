@@ -22,14 +22,15 @@ _Занимает до нескольких минут._
 `python src/simulation.py`
 
 Для запуска NN-модели, предсказывающей длину синдрома:
-_Занимает до нескольких минут из-за поиска оптимальных параметров._
 
 `python src/model.py 2>/dev/null`
 
 ### Результаты
 ```
-Random Guess Accuracy: 0.559748427672956
+Random Guess MAE: 1521.3041260670682
+Random Guess MAPE: 2.0145481685022957
 Best parameters found:
- {'activation': 'tanh', 'alpha': 0.0001, 'hidden_layer_sizes': (100,), 'learning_rate': 'adaptive', 'solver': 'adam'}
-MLP Accuracy: 0.8427672955974843
+ {'activation': 'relu', 'alpha': 0.0001, 'hidden_layer_sizes': (100,), 'learning_rate': 'constant', 'solver': 'adam'}
+MLP MAE: 26.5181715590117
+MLP MAPE: 0.0234864184142573
 ```
